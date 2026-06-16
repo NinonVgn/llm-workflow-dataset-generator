@@ -1,0 +1,842 @@
+{
+  "models_reference": [
+    {
+      "slug": "gpt-5",
+      "name": "GPT-5",
+      "vendor": "OpenAI",
+      "context_window_tokens": 400000,
+      "input_price_per_1m_usd": 1.25,
+      "cached_input_price_per_1m_usd": 0.125,
+      "output_price_per_1m_usd": 10.00
+    },
+    {
+      "slug": "gpt-5-mini",
+      "name": "GPT-5 Mini",
+      "vendor": "OpenAI",
+      "context_window_tokens": 200000,
+      "input_price_per_1m_usd": 0.25,
+      "cached_input_price_per_1m_usd": 0.025,
+      "output_price_per_1m_usd": 2.00
+    },
+    {
+      "slug": "gpt-4-1",
+      "name": "GPT-4.1",
+      "vendor": "OpenAI",
+      "context_window_tokens": 1000000,
+      "input_price_per_1m_usd": 2.00,
+      "cached_input_price_per_1m_usd": 0.20,
+      "output_price_per_1m_usd": 8.00
+    },
+    {
+      "slug": "o3",
+      "name": "o3",
+      "vendor": "OpenAI",
+      "context_window_tokens": 200000,
+      "input_price_per_1m_usd": 15.00,
+      "cached_input_price_per_1m_usd": 1.50,
+      "output_price_per_1m_usd": 60.00
+    },
+    {
+      "slug": "claude-opus-4",
+      "name": "Claude Opus 4",
+      "vendor": "Anthropic",
+      "context_window_tokens": 200000,
+      "input_price_per_1m_usd": 15.00,
+      "cached_input_price_per_1m_usd": 1.50,
+      "output_price_per_1m_usd": 75.00
+    },
+    {
+      "slug": "claude-sonnet-4",
+      "name": "Claude Sonnet 4",
+      "vendor": "Anthropic",
+      "context_window_tokens": 200000,
+      "input_price_per_1m_usd": 3.00,
+      "cached_input_price_per_1m_usd": 0.30,
+      "output_price_per_1m_usd": 15.00
+    },
+    {
+      "slug": "claude-haiku-4",
+      "name": "Claude Haiku 4",
+      "vendor": "Anthropic",
+      "context_window_tokens": 200000,
+      "input_price_per_1m_usd": 1.00,
+      "cached_input_price_per_1m_usd": 0.10,
+      "output_price_per_1m_usd": 5.00
+    },
+    {
+      "slug": "gemini-2-5-pro",
+      "name": "Gemini 2.5 Pro",
+      "vendor": "Google",
+      "context_window_tokens": 1000000,
+      "input_price_per_1m_usd": 1.25,
+      "cached_input_price_per_1m_usd": 0.3125,
+      "output_price_per_1m_usd": 10.00
+    },
+    {
+      "slug": "gemini-2-5-flash",
+      "name": "Gemini 2.5 Flash",
+      "vendor": "Google",
+      "context_window_tokens": 1000000,
+      "input_price_per_1m_usd": 0.30,
+      "cached_input_price_per_1m_usd": 0.075,
+      "output_price_per_1m_usd": 2.50
+    },
+    {
+      "slug": "llama-3-3-70b-self-host",
+      "name": "Llama 3.3 70B (self-hosted)",
+      "vendor": "Meta / self-host",
+      "context_window_tokens": 128000,
+      "input_price_per_1m_usd": 0.12,
+      "cached_input_price_per_1m_usd": null,
+      "output_price_per_1m_usd": 0.12
+    },
+    {
+      "slug": "deepseek-v3",
+      "name": "DeepSeek V3",
+      "vendor": "DeepSeek",
+      "context_window_tokens": 131072,
+      "input_price_per_1m_usd": 0.27,
+      "cached_input_price_per_1m_usd": 0.07,
+      "output_price_per_1m_usd": 1.10
+    },
+    {
+      "slug": "text-embedding-3-large",
+      "name": "text-embedding-3-large",
+      "vendor": "OpenAI",
+      "context_window_tokens": 8191,
+      "input_price_per_1m_usd": 0.13,
+      "cached_input_price_per_1m_usd": null,
+      "output_price_per_1m_usd": 0.00
+    }
+  ],
+  "workflows": [
+    {
+      "slug": "earnings-call-analysis-rag",
+      "name": "Earnings call analysis with RAG",
+      "one_liner": "Ingest 50-200 transcripts per cycle, run analyst Q&A against them with context stitched from a vector index.",
+      "who_runs_it": "Quant and multi-strat hedge funds, long-only research desks. Typically 10-40 analysts per fund running structured Q&A across a full transcript corpus each earnings cycle.",
+      "trigger": "Each earnings cycle (4x/year) plus ad-hoc on new prints from covered companies.",
+      "default_model_slug": "claude-sonnet-4",
+      "scenario": {
+        "label": "Mid-size hedge fund, single cycle",
+        "runs_per_day": 8,
+        "active_users": 30,
+        "working_days_per_year": 250,
+        "documents_per_run": 120,
+        "avg_doc_tokens": 8000
+      },
+      "cost_breakdown": [
+        {
+          "component": "model",
+          "label": "LLM inference (Claude Sonnet 4)",
+          "what_happens": "Each Q&A round sends a stitched retrieval context plus the analyst question to the model and receives a structured answer with citations.",
+          "tokens_in_per_run": 42000,
+          "tokens_out_per_run": 1800,
+          "calls_per_run": 6,
+          "usd_per_run": 0.153,
+          "share_of_run_pct": 14,
+          "invisible_reason": null
+        },
+        {
+          "component": "prompt",
+          "label": "System prompt and few-shot examples",
+          "what_happens": "A 8,500-token reusable prefix defining output schema, citation format, and analyst persona is prepended to every model call without caching.",
+          "tokens_in_per_run": 51000,
+          "tokens_out_per_run": 0,
+          "calls_per_run": 6,
+          "usd_per_run": 0.153,
+          "share_of_run_pct": 14,
+          "invisible_reason": null
+        },
+        {
+          "component": "orchestration",
+          "label": "Tool calls and agent framework hops",
+          "what_happens": "Each run triggers an extractor, router, and answerer tool chain; each hop is a billed LLM call. LangChain abstracts these into one logical invocation.",
+          "tokens_in_per_run": 6000,
+          "tokens_out_per_run": 400,
+          "calls_per_run": 8,
+          "usd_per_run": 0.024,
+          "share_of_run_pct": 2,
+          "invisible_reason": "Framework abstraction (LangChain / LlamaIndex) hides per-hop billing inside one logical call on the dashboard."
+        },
+        {
+          "component": "retrieval",
+          "label": "Vector search and embedding refresh",
+          "what_happens": "Each query hits the vector store; new transcript chunks are re-embedded every cycle using text-embedding-3-large at $0.13/M tokens.",
+          "tokens_in_per_run": 9500,
+          "tokens_out_per_run": 0,
+          "calls_per_run": 14,
+          "usd_per_run": 0.069,
+          "share_of_run_pct": 6,
+          "invisible_reason": "Embedding bills land on a separate OpenAI invoice and never join the workflow P&L visible to the CTO."
+        },
+        {
+          "component": "history",
+          "label": "Context re-injection across iterations",
+          "what_happens": "Prior Q&A turns are re-sent in full on every follow-up call to preserve thread state. Across 5 calls, accumulated thread tokens total 230k input with no pruning policy active.",
+          "tokens_in_per_run": 230000,
+          "tokens_out_per_run": 0,
+          "calls_per_run": 5,
+          "usd_per_run": 0.690,
+          "share_of_run_pct": 63,
+          "invisible_reason": "Pure overhead - the same tokens are billed again on every turn because no pruning or compression policy has been configured."
+        }
+      ],
+      "totals": {
+        "usd_per_run": 1.089,
+        "usd_per_user_per_day": 8.71,
+        "usd_per_year_scenario": 65300,
+        "invisible_share_pct": 71
+      },
+      "shock_line": "A 30-analyst desk spends ~$65k/yr on earnings analysis; 71% is context re-injection and invisible orchestration hops that no one set a policy on.",
+      "what_firedog_shows": [
+        "Per-run cost broken down to the cent across all five components, updated in real time.",
+        "Which turn in the Q&A loop billed the most tokens and why history re-injection is the dominant line item.",
+        "Exact $/year saved by activating a pruning policy versus routing follow-up turns to Claude Haiku 4."
+      ],
+      "what_you_can_do": [
+        "Set a sliding-window pruning policy on history re-injection to cap per-turn context at 10k tokens.",
+        "Route follow-up turns to Claude Haiku 4; reserve Sonnet 4 for the first analytical call only.",
+        "Cache the system prompt prefix via Anthropic prompt caching to drop that input cost by ~10x."
+      ],
+      "meta": "Earnings call RAG: 72% of a $65k/yr hedge fund workflow is invisible context re-injection. Firedog instruments it per run."
+    },
+    {
+      "slug": "market-research-synthesis-agentic",
+      "name": "Market research synthesis (agentic loop)",
+      "one_liner": "Multi-source research agent that autonomously browses, retrieves, and synthesizes a structured sector brief.",
+      "who_runs_it": "Macro and sector hedge funds, VC research teams, sell-side desk pods. A single brief typically drives 15-40 minutes of wall-clock agentic runtime.",
+      "trigger": "Weekly sector updates plus on-demand for event-driven trades; 3-8 briefs per analyst per week.",
+      "default_model_slug": "claude-opus-4",
+      "scenario": {
+        "label": "10-analyst macro fund, weekly cadence",
+        "runs_per_day": 6,
+        "active_users": 10,
+        "working_days_per_year": 250,
+        "documents_per_run": 30,
+        "avg_doc_tokens": 5000
+      },
+      "cost_breakdown": [
+        {
+          "component": "model",
+          "label": "LLM inference (Claude Opus 4)",
+          "what_happens": "Each agentic step sends the current research state plus new retrieved content to Opus 4. Iteration count varies 8-22 steps per brief.",
+          "tokens_in_per_run": 55000,
+          "tokens_out_per_run": 8000,
+          "calls_per_run": 14,
+          "usd_per_run": 1.425,
+          "share_of_run_pct": 29,
+          "invisible_reason": null
+        },
+        {
+          "component": "prompt",
+          "label": "Research persona and output schema prefix",
+          "what_happens": "A 6,000-token system prompt defining research depth, output sections, and citation style is resent on every iteration without prompt caching enabled.",
+          "tokens_in_per_run": 84000,
+          "tokens_out_per_run": 0,
+          "calls_per_run": 14,
+          "usd_per_run": 1.26,
+          "share_of_run_pct": 26,
+          "invisible_reason": null
+        },
+        {
+          "component": "orchestration",
+          "label": "Planner-executor-verifier loop hops",
+          "what_happens": "Each iteration invokes a planner subagent, one or more executor agents, and a verifier; each is a separate billed call. A 14-step brief produces 42 billed hops.",
+          "tokens_in_per_run": 18000,
+          "tokens_out_per_run": 2200,
+          "calls_per_run": 42,
+          "usd_per_run": 0.603,
+          "share_of_run_pct": 12,
+          "invisible_reason": "Each planner-executor-verifier trio looks like one 'research step' in logs; the three underlying API calls are never surfaced as separate line items."
+        },
+        {
+          "component": "retrieval",
+          "label": "Iterative web and vector retrieval",
+          "what_happens": "The agent fetches and re-embeds sources on each loop iteration. Retrieval is not deduplicated across steps; overlapping sources are re-embedded.",
+          "tokens_in_per_run": 22000,
+          "tokens_out_per_run": 0,
+          "calls_per_run": 28,
+          "usd_per_run": 0.241,
+          "share_of_run_pct": 5,
+          "invisible_reason": "Retrieval cost sits on the vector-DB vendor invoice; no cross-charging to the workflow P&L occurs."
+        },
+        {
+          "component": "history",
+          "label": "Full research thread re-sent each iteration",
+          "what_happens": "The complete running research memo is prepended to every iteration call so the agent retains prior reasoning. By step 14 this is 60k+ accumulated tokens sent each time.",
+          "tokens_in_per_run": 140000,
+          "tokens_out_per_run": 0,
+          "calls_per_run": 14,
+          "usd_per_run": 1.365,
+          "share_of_run_pct": 28,
+          "invisible_reason": "Accumulated research state is framed as 'context' in framework logs, not as re-billed tokens, so it does not appear in per-call spend reporting."
+        }
+      ],
+      "totals": {
+        "usd_per_run": 4.89,
+        "usd_per_user_per_day": 29.34,
+        "usd_per_year_scenario": 73400,
+        "invisible_share_pct": 45
+      },
+      "shock_line": "One agentic sector brief costs ~$4.90 to run; a 10-analyst fund burns ~$73k/yr and 45% is orchestration overhead and re-billed accumulation no dashboard shows.",
+      "what_firedog_shows": [
+        "Token cost per agentic iteration, showing the inflection point where history accumulation overtakes inference spend.",
+        "Which executor agent calls are producing duplicate retrieval and how much that costs per brief.",
+        "Projected $/year reduction from capping iteration depth at 10 steps with a summary-compression step."
+      ],
+      "what_you_can_do": [
+        "Implement a rolling summary compression after step 5 to prevent unbounded history accumulation.",
+        "Deduplicate retrieved sources before re-embedding; roughly 30% of retrieval calls hit already-ingested content.",
+        "Route planner and verifier hops to Haiku 4; run only executor calls on Opus 4."
+      ],
+      "meta": "Agentic sector brief: $4.90/run, 45% invisible. Firedog maps every iteration hop and accumulation spike on a macro fund's research loop."
+    },
+    {
+      "slug": "regulatory-filing-review",
+      "name": "Regulatory filing review",
+      "one_liner": "10-K, prospectus, and fund-doc review using a long-context model to extract risk factors, covenants, and material changes.",
+      "who_runs_it": "Legal, compliance, and investment teams at hedge funds, PE firms, and asset managers. Driven by fund doc review for new allocations and ongoing 10-K monitoring for covered names.",
+      "trigger": "SEC filing events (10-K, 10-Q, prospectus, S-1) plus ad-hoc on fund subscription documents for new LP commitments.",
+      "default_model_slug": "gemini-2-5-pro",
+      "scenario": {
+        "label": "PE fund, ongoing portfolio and deal review",
+        "runs_per_day": 5,
+        "active_users": 12,
+        "working_days_per_year": 250,
+        "documents_per_run": 2,
+        "avg_doc_tokens": 95000
+      },
+      "cost_breakdown": [
+        {
+          "component": "model",
+          "label": "Long-context inference (Gemini 2.5 Pro)",
+          "what_happens": "Full document context (90k-200k tokens) is sent in one call. Gemini 2.5 Pro is preferred for the 1M-token flat-rate window and strong extraction on dense legal text.",
+          "tokens_in_per_run": 192000,
+          "tokens_out_per_run": 5500,
+          "calls_per_run": 2,
+          "usd_per_run": 0.295,
+          "share_of_run_pct": 38,
+          "invisible_reason": null
+        },
+        {
+          "component": "prompt",
+          "label": "Extraction schema and compliance checklist",
+          "what_happens": "A 9,500-token prompt encodes the extraction schema (risk categories, covenant types, change-in-control triggers) and is sent twice per run without caching.",
+          "tokens_in_per_run": 19000,
+          "tokens_out_per_run": 0,
+          "calls_per_run": 2,
+          "usd_per_run": 0.024,
+          "share_of_run_pct": 3,
+          "invisible_reason": null
+        },
+        {
+          "component": "orchestration",
+          "label": "Pre-processing and post-processing pipeline calls",
+          "what_happens": "A chunking agent pre-processes the PDF into structured sections; a validation agent checks extraction completeness. Both are billed model calls.",
+          "tokens_in_per_run": 14000,
+          "tokens_out_per_run": 1800,
+          "calls_per_run": 4,
+          "usd_per_run": 0.032,
+          "share_of_run_pct": 4,
+          "invisible_reason": "Pre- and post-processing calls are logged as 'pipeline infra' costs, not attributed to the filing review workflow."
+        },
+        {
+          "component": "retrieval",
+          "label": "Precedent-filing vector lookup",
+          "what_happens": "Prior filings from the same issuer are retrieved from the vector store to enable change-detection. Embeddings are regenerated on each run rather than cached.",
+          "tokens_in_per_run": 24000,
+          "tokens_out_per_run": 0,
+          "calls_per_run": 8,
+          "usd_per_run": 0.251,
+          "share_of_run_pct": 32,
+          "invisible_reason": "Embedding regeneration on every run is a design default in LlamaIndex; the cost appears on the embedding-provider invoice, not in the LLM spend view."
+        },
+        {
+          "component": "history",
+          "label": "Cross-document comparison context",
+          "what_happens": "Summaries from the prior cycle review are prepended to the current run to enable year-over-year change analysis without storing structured diffs.",
+          "tokens_in_per_run": 18000,
+          "tokens_out_per_run": 0,
+          "calls_per_run": 2,
+          "usd_per_run": 0.178,
+          "share_of_run_pct": 23,
+          "invisible_reason": "Cross-cycle context is framed as 'document memory' and handled by the application layer; it never appears as a token cost line in the model provider bill."
+        }
+      ],
+      "totals": {
+        "usd_per_run": 0.78,
+        "usd_per_user_per_day": 3.25,
+        "usd_per_year_scenario": 11700,
+        "invisible_share_pct": 59
+      },
+      "shock_line": "Regulatory filing review costs ~$0.78/run but 59% is re-embedded precedent lookups and cross-cycle context injection hidden across two vendor invoices.",
+      "what_firedog_shows": [
+        "Full per-run attribution split across model, retrieval, and history components with exact token counts.",
+        "Which retrieval calls are regenerating embeddings for documents already in the index.",
+        "Dollar impact of switching from per-run re-embedding to cached incremental updates."
+      ],
+      "what_you_can_do": [
+        "Cache prior-cycle summaries as structured JSON diffs rather than re-injecting full text each run.",
+        "Switch to incremental embedding updates so only changed filing sections are re-embedded.",
+        "Enable Gemini context caching for the extraction schema prefix to reduce prompt overhead by ~90%."
+      ],
+      "meta": "10-K and fund-doc review: $0.78/run, 59% in embedding regeneration and cross-cycle context. Firedog splits the two invoices into one P&L view."
+    },
+    {
+      "slug": "portfolio-monitoring-signal-generation",
+      "name": "Portfolio monitoring and signal generation",
+      "one_liner": "Recurring agentic run across multiple tickers - news, filings, macro data - producing structured trade signals with compounding history.",
+      "who_runs_it": "Systematic and quant hedge funds, multi-strat pods, and prop trading desks running intraday or end-of-day signal pipelines across 50-500 names.",
+      "trigger": "Scheduled: intraday every 30-60 minutes during market hours, plus event-driven on news alerts and filing filings. History compounds across every run.",
+      "default_model_slug": "gpt-4-1",
+      "scenario": {
+        "label": "Mid-size quant fund, 150-ticker universe",
+        "runs_per_day": 12,
+        "active_users": 8,
+        "working_days_per_year": 250,
+        "documents_per_run": 45,
+        "avg_doc_tokens": 3000
+      },
+      "cost_breakdown": [
+        {
+          "component": "model",
+          "label": "Signal inference (GPT-4.1)",
+          "what_happens": "For each ticker batch, the model receives current news context plus the signal schema and produces a structured JSON signal object.",
+          "tokens_in_per_run": 38000,
+          "tokens_out_per_run": 4200,
+          "calls_per_run": 15,
+          "usd_per_run": 0.110,
+          "share_of_run_pct": 18,
+          "invisible_reason": null
+        },
+        {
+          "component": "prompt",
+          "label": "Signal schema, ticker metadata, and examples",
+          "what_happens": "A 4,200-token prompt encoding signal categories, confidence thresholds, and sector-specific few-shot examples is sent on every ticker-batch call.",
+          "tokens_in_per_run": 63000,
+          "tokens_out_per_run": 0,
+          "calls_per_run": 15,
+          "usd_per_run": 0.126,
+          "share_of_run_pct": 21,
+          "invisible_reason": null
+        },
+        {
+          "component": "orchestration",
+          "label": "Ticker batching, routing, and aggregation calls",
+          "what_happens": "A router agent groups tickers into batches, dispatches to signal agents, and an aggregator merges outputs. Each produces a separate billed call.",
+          "tokens_in_per_run": 9500,
+          "tokens_out_per_run": 1100,
+          "calls_per_run": 18,
+          "usd_per_run": 0.028,
+          "share_of_run_pct": 5,
+          "invisible_reason": "Batching and aggregation calls are attributed to 'orchestration infrastructure' in the platform, not to this workflow's cost center."
+        },
+        {
+          "component": "retrieval",
+          "label": "News and filing vector lookups per ticker",
+          "what_happens": "Each ticker triggers an independent vector query for the last 24 hours of news and any recent filings. Queries are not batched; 150 tickers produce 150 round trips.",
+          "tokens_in_per_run": 28000,
+          "tokens_out_per_run": 0,
+          "calls_per_run": 150,
+          "usd_per_run": 0.067,
+          "share_of_run_pct": 11,
+          "invisible_reason": "Vector DB query costs are on the Pinecone or Weaviate invoice; no join to the LLM workflow P&L has been built."
+        },
+        {
+          "component": "history",
+          "label": "Prior signal state re-injection",
+          "what_happens": "The last 3 signal outputs per ticker are prepended on every run so the model can detect trend changes. Across 150 tickers this accumulates 90k+ tokens per run.",
+          "tokens_in_per_run": 112000,
+          "tokens_out_per_run": 0,
+          "calls_per_run": 15,
+          "usd_per_run": 0.269,
+          "share_of_run_pct": 45,
+          "invisible_reason": "Signal state history is maintained by the application layer as a 'context window' feature; none of the LLM vendor dashboards show it as a distinct cost component."
+        }
+      ],
+      "totals": {
+        "usd_per_run": 0.60,
+        "usd_per_user_per_day": 0.90,
+        "usd_per_year_scenario": 14400,
+        "invisible_share_pct": 61
+      },
+      "shock_line": "Portfolio signal generation on 150 tickers costs $0.60/run; run it 12x/day for a year and 61% of the $14.4k annual bill is invisible history re-injection across ticker batches.",
+      "what_firedog_shows": [
+        "Per-run cost with history accumulation graphed over the trading day - showing cost-per-run drift as history grows.",
+        "Which tickers are generating the most history volume and driving disproportionate per-batch cost.",
+        "Projected annual saving from rolling a 1-signal rather than 3-signal lookback per ticker."
+      ],
+      "what_you_can_do": [
+        "Reduce the signal history window from 3 prior runs to 1 per ticker; test accuracy delta before committing.",
+        "Batch ticker vector queries into grouped calls; 150 individual round trips is the single largest latency and cost driver.",
+        "Route ticker batches with no recent news activity to GPT-5 Mini or Claude Haiku 4 to cut per-run model cost by 75%."
+      ],
+      "meta": "Portfolio signal generation: 61% of cost is invisible prior-signal history. Firedog tracks accumulation drift per ticker across every intraday run."
+    },
+    {
+      "slug": "deal-investment-memo-generation",
+      "name": "Deal and investment memo generation",
+      "one_liner": "Structured investment memo from 20-50 source documents - CIM, financials, management decks, diligence notes - with citation-backed sections.",
+      "who_runs_it": "PE and VC investment teams, M&A desks at hedge funds. Memo generation is a high-value, low-frequency workflow with high tolerance for cost but zero tolerance for hallucination.",
+      "trigger": "New deal entry to IC pipeline; typically 1-4 memos per analyst per month. Revision cycles add 2-5 additional runs per memo.",
+      "default_model_slug": "claude-opus-4",
+      "scenario": {
+        "label": "Mid-market PE fund, 3 active deals",
+        "runs_per_day": 3,
+        "active_users": 6,
+        "working_days_per_year": 250,
+        "documents_per_run": 35,
+        "avg_doc_tokens": 12000
+      },
+      "cost_breakdown": [
+        {
+          "component": "model",
+          "label": "Long-form synthesis (Claude Opus 4)",
+          "what_happens": "The model ingests a stitched document context and produces a 4,000-8,000 token structured memo with section-level citations. Opus 4 is used for hallucination risk tolerance reasons.",
+          "tokens_in_per_run": 85000,
+          "tokens_out_per_run": 6500,
+          "calls_per_run": 3,
+          "usd_per_run": 1.762,
+          "share_of_run_pct": 37,
+          "invisible_reason": null
+        },
+        {
+          "component": "prompt",
+          "label": "IC memo template and section schema",
+          "what_happens": "A 12,000-token prompt encodes section headings, financial model hooks, risk taxonomy, and 4 full few-shot examples. Sent on every call without caching.",
+          "tokens_in_per_run": 36000,
+          "tokens_out_per_run": 0,
+          "calls_per_run": 3,
+          "usd_per_run": 0.540,
+          "share_of_run_pct": 11,
+          "invisible_reason": null
+        },
+        {
+          "component": "orchestration",
+          "label": "Document ingestion and section routing agents",
+          "what_happens": "An ingestion agent chunks and classifies source documents; a routing agent dispatches chunks to section-specific sub-calls; a merge agent assembles the output.",
+          "tokens_in_per_run": 22000,
+          "tokens_out_per_run": 3000,
+          "calls_per_run": 9,
+          "usd_per_run": 0.555,
+          "share_of_run_pct": 12,
+          "invisible_reason": "Document ingestion and merge agents are instrumented as 'data pipeline' steps in engineering logs, not as LLM spend in the finance system."
+        },
+        {
+          "component": "retrieval",
+          "label": "Source document chunk retrieval",
+          "what_happens": "Each section call retrieves the top-12 relevant chunks from the source document index. Re-embedding runs on every revision cycle even when source docs have not changed.",
+          "tokens_in_per_run": 42000,
+          "tokens_out_per_run": 0,
+          "calls_per_run": 18,
+          "usd_per_run": 0.205,
+          "share_of_run_pct": 4,
+          "invisible_reason": "Re-embedding unchanged source docs on revision runs is a known inefficiency; the cost is buried in the embedding vendor line rather than the deal P&L."
+        },
+        {
+          "component": "history",
+          "label": "Prior memo draft re-injection on revisions",
+          "what_happens": "Revision runs prepend the full prior memo draft to the model call context so the model can diff its own output. A 5,000-token draft becomes 25,000 tokens re-billed across 5 revisions.",
+          "tokens_in_per_run": 48000,
+          "tokens_out_per_run": 0,
+          "calls_per_run": 3,
+          "usd_per_run": 1.728,
+          "share_of_run_pct": 36,
+          "invisible_reason": "Revision-cycle context is framed as 'draft history' by the application; it appears nowhere in the per-run cost breakdown visible to finance or risk."
+        }
+      ],
+      "totals": {
+        "usd_per_run": 4.79,
+        "usd_per_user_per_day": 2.395,
+        "usd_per_year_scenario": 21500,
+        "invisible_share_pct": 52
+      },
+      "shock_line": "An investment memo costs ~$4.80 to generate; revision cycles mean 52% of the $21.5k/yr total is prior-draft context re-injected on every edit nobody is tracking.",
+      "what_firedog_shows": [
+        "Per-run cost by memo section, showing which revision run triggered the largest context spike.",
+        "How much of each run's token spend is the prior-draft re-injection versus new synthesis.",
+        "Dollar cost of enabling prompt caching on the IC memo template across 250 working days."
+      ],
+      "what_you_can_do": [
+        "Store prior drafts as structured section diffs rather than full-text re-injection to cap revision overhead.",
+        "Cache the 12,000-token IC memo template prefix; at 3 calls/run and $15/M input this saves roughly $0.54 per run.",
+        "Flag revision runs for incremental embedding updates; re-embedding unchanged source docs on every revision is the largest single waste line."
+      ],
+      "meta": "Investment memo generation: $4.80/run, 52% hidden in revision-cycle draft re-injection. Firedog tracks cost per memo revision across PE deal workflows."
+    },
+    {
+      "slug": "news-filing-alert-triage",
+      "name": "News and filing alert triage",
+      "one_liner": "High-frequency classification and summarization of news and SEC filings into structured alerts routed by materiality tier.",
+      "who_runs_it": "Trading desks, event-driven hedge funds, and risk teams at large asset managers. Volume is high; latency requirements are strict (sub-30s); models must be fast and cheap.",
+      "trigger": "Continuous stream during market hours: ~200-800 raw items per hour depending on market conditions and covered-name universe.",
+      "default_model_slug": "claude-haiku-4",
+      "scenario": {
+        "label": "Event-driven hedge fund, 300-name universe",
+        "runs_per_day": 400,
+        "active_users": 10,
+        "working_days_per_year": 250,
+        "documents_per_run": 1,
+        "avg_doc_tokens": 1800
+      },
+      "cost_breakdown": [
+        {
+          "component": "model",
+          "label": "Classification and summarization (Claude Haiku 4)",
+          "what_happens": "Each news item or filing alert is sent to Haiku 4 for materiality classification (5-tier) and a 150-token structured summary.",
+          "tokens_in_per_run": 2200,
+          "tokens_out_per_run": 180,
+          "calls_per_run": 1,
+          "usd_per_run": 0.003,
+          "share_of_run_pct": 16,
+          "invisible_reason": null
+        },
+        {
+          "component": "prompt",
+          "label": "Classification schema and entity metadata",
+          "what_happens": "A 4,800-token prompt carries the materiality taxonomy, covered-name list, and 6 few-shot examples. Sent on every call with no caching enabled.",
+          "tokens_in_per_run": 4800,
+          "tokens_out_per_run": 0,
+          "calls_per_run": 1,
+          "usd_per_run": 0.005,
+          "share_of_run_pct": 27,
+          "invisible_reason": null
+        },
+        {
+          "component": "orchestration",
+          "label": "Ingestion, dedup, and routing pipeline",
+          "what_happens": "A dedup agent checks the item against a 24-hour seen-items cache; a routing agent sends Tier-1 alerts to a downstream escalation model. Both are billed calls.",
+          "tokens_in_per_run": 1400,
+          "tokens_out_per_run": 200,
+          "calls_per_run": 2,
+          "usd_per_run": 0.0022,
+          "share_of_run_pct": 12,
+          "invisible_reason": "Dedup and routing agents are considered 'infrastructure' and billed to the platform cost center, not the signal workflow budget."
+        },
+        {
+          "component": "retrieval",
+          "label": "Entity resolution and prior-alert lookup",
+          "what_happens": "Each item triggers an entity resolution query to map freetext company names to internal tickers, plus a prior-alert lookup to detect duplicates.",
+          "tokens_in_per_run": 900,
+          "tokens_out_per_run": 0,
+          "calls_per_run": 2,
+          "usd_per_run": 0.0005,
+          "share_of_run_pct": 3,
+          "invisible_reason": "Entity resolution queries are served by an in-house NER model whose inference cost is allocated to the infra team, not the trading workflow."
+        },
+        {
+          "component": "history",
+          "label": "Coverage context re-injection",
+          "what_happens": "For Tier-1 items, the last 3 alerts on the same ticker are prepended to provide trend context. This multiplies input tokens for the highest-value subset of items.",
+          "tokens_in_per_run": 7500,
+          "tokens_out_per_run": 0,
+          "calls_per_run": 1,
+          "usd_per_run": 0.008,
+          "share_of_run_pct": 42,
+          "invisible_reason": "Coverage context is injected by the alert-enrichment service; it shows up as increased prompt length in the model bill but is never attributed to this workflow."
+        }
+      ],
+      "totals": {
+        "usd_per_run": 0.0187,
+        "usd_per_user_per_day": 0.748,
+        "usd_per_year_scenario": 18700,
+        "invisible_share_pct": 57
+      },
+      "shock_line": "At $0.019/run and 400 runs/day, news triage looks trivially cheap - until you realize 57% is uncached prompt overhead, routing infrastructure, and coverage context that scales with alert volume, not analyst headcount.",
+      "what_firedog_shows": [
+        "Total daily and monthly triage cost with per-run breakdown, updated in real time.",
+        "Cost-per-alert by materiality tier, showing that Tier-1 items (context-enriched) cost 3x Tier-4 items.",
+        "Projected annual saving from caching the classification schema prefix across 400 daily runs."
+      ],
+      "what_you_can_do": [
+        "Cache the 3,800-token classification schema prefix; at 400 runs/day and $1/M input, caching saves ~$0.49/day - $122/yr at 90% cache hit rate.",
+        "Limit prior-alert context injection to Tier-1 and Tier-2 items only; Tier-3 and below do not benefit from trend context.",
+        "Batch Tier-4 and Tier-5 items with a 60-second delay window to reduce per-item call overhead."
+      ],
+      "meta": "News alert triage: 400 runs/day, 36% hidden in uncached prompt overhead. Firedog tracks cost-per-tier and accumulation drift on high-frequency streams."
+    },
+    {
+      "slug": "counterparty-kyc-document-review",
+      "name": "Counterparty and KYC document review",
+      "one_liner": "Bulk ingestion of counterparty packs, ownership structures, and AML docs with redundant retrieval patterns typical of compliance workflows.",
+      "who_runs_it": "Prime brokerage, credit trading, and compliance teams at hedge funds and asset managers. Triggered by new counterparty onboarding, annual re-certification, and credit line reviews.",
+      "trigger": "New counterparty onboarding (sporadic, high-doc volume), annual KYC refresh cycles, and credit event reviews. Compliance teams run 5-20 reviews per week.",
+      "default_model_slug": "gpt-4-1",
+      "scenario": {
+        "label": "Hedge fund compliance team, weekly cadence",
+        "runs_per_day": 4,
+        "active_users": 8,
+        "working_days_per_year": 250,
+        "documents_per_run": 22,
+        "avg_doc_tokens": 14000
+      },
+      "cost_breakdown": [
+        {
+          "component": "model",
+          "label": "Extraction and risk scoring (GPT-4.1)",
+          "what_happens": "Each document batch is sent to GPT-4.1 for structured entity extraction (beneficial owners, jurisdictions, sanctions flags) and a risk-tier score.",
+          "tokens_in_per_run": 62000,
+          "tokens_out_per_run": 4800,
+          "calls_per_run": 5,
+          "usd_per_run": 0.162,
+          "share_of_run_pct": 22,
+          "invisible_reason": null
+        },
+        {
+          "component": "prompt",
+          "label": "Compliance checklist and jurisdiction rules",
+          "what_happens": "A 9,000-token prompt encodes FATF categories, sanctions list references, and ownership threshold rules. Sent per call without caching.",
+          "tokens_in_per_run": 45000,
+          "tokens_out_per_run": 0,
+          "calls_per_run": 5,
+          "usd_per_run": 0.090,
+          "share_of_run_pct": 12,
+          "invisible_reason": null
+        },
+        {
+          "component": "orchestration",
+          "label": "Document classification and ownership graph resolution",
+          "what_happens": "An OCR/classification agent pre-processes each document; a graph-resolution agent traces ownership chains. Both produce billed model calls that no workflow monitor attributes to this job.",
+          "tokens_in_per_run": 18000,
+          "tokens_out_per_run": 2400,
+          "calls_per_run": 12,
+          "usd_per_run": 0.055,
+          "share_of_run_pct": 7,
+          "invisible_reason": "Ownership graph resolution is run by a separate compliance microservice; its LLM calls land on a different cost center and never appear in the KYC workflow P&L."
+        },
+        {
+          "component": "retrieval",
+          "label": "Sanctions database and precedent-case lookups",
+          "what_happens": "Each entity triggers an embedding lookup against the sanctions database and a precedent-case vector store. Lookups are not cached between documents in the same counterparty pack.",
+          "tokens_in_per_run": 55000,
+          "tokens_out_per_run": 0,
+          "calls_per_run": 44,
+          "usd_per_run": 0.218,
+          "share_of_run_pct": 29,
+          "invisible_reason": "Sanctions lookup embeddings are managed by the compliance platform vendor; costs appear on the compliance SaaS invoice, not the AI workflow budget."
+        },
+        {
+          "component": "history",
+          "label": "Prior review and exception history re-injection",
+          "what_happens": "Prior KYC review summaries for the counterparty are prepended to every call to enable change detection. Annual refresh runs accumulate 2-3 prior review summaries in context.",
+          "tokens_in_per_run": 32000,
+          "tokens_out_per_run": 0,
+          "calls_per_run": 5,
+          "usd_per_run": 0.225,
+          "share_of_run_pct": 30,
+          "invisible_reason": "Prior review summaries are injected by the case-management system as 'counterparty history'; the resulting token cost is not tracked against the AI workflow budget by any current tooling."
+        }
+      ],
+      "totals": {
+        "usd_per_run": 0.75,
+        "usd_per_user_per_day": 0.375,
+        "usd_per_year_scenario": 6000,
+        "invisible_share_pct": 66
+      },
+      "shock_line": "KYC document review costs $0.75/run but 66% is split across three separate vendor invoices - sanctions lookups, ownership graph calls, and prior-review history that no single dashboard joins.",
+      "what_firedog_shows": [
+        "Unified per-run view joining LLM, embedding, and compliance-platform costs for the first time.",
+        "Which counterparty documents are triggering redundant sanctions lookups due to entity overlap within the same pack.",
+        "Dollar impact of caching sanctions lookup results for 24 hours given the low rate of sanctions list updates."
+      ],
+      "what_you_can_do": [
+        "Cache sanctions lookup results per named entity for a 24-hour TTL; sanctions lists update daily at most, not per-document.",
+        "Deduplicate entity extraction across documents in the same counterparty pack before triggering ownership graph resolution.",
+        "Store prior review summaries as structured change-detection objects rather than full text to cap history re-injection at 5,000 tokens per counterparty."
+      ],
+      "meta": "KYC review: $0.75/run, 66% invisible across three vendor invoices. Firedog is the first tool to join compliance platform, embedding, and LLM costs per review run."
+    },
+    {
+      "slug": "internal-research-chatbot-rag",
+      "name": "Internal research chatbot over fund knowledge base",
+      "one_liner": "Analyst chat interface over a RAG index of internal research notes, models, and meeting transcripts with multi-turn conversation history.",
+      "who_runs_it": "Research analysts and portfolio managers at hedge funds and asset managers. Usage is continuous and conversational; session depth compounds cost non-linearly.",
+      "trigger": "Ad-hoc analyst queries throughout the trading day. Average session length 6-14 turns. Power users run 8-15 sessions per day.",
+      "default_model_slug": "claude-sonnet-4",
+      "scenario": {
+        "label": "25-analyst multi-strat fund, full-day usage",
+        "runs_per_day": 10,
+        "active_users": 25,
+        "working_days_per_year": 250,
+        "documents_per_run": 8,
+        "avg_doc_tokens": 4500
+      },
+      "cost_breakdown": [
+        {
+          "component": "model",
+          "label": "Conversational inference (Claude Sonnet 4)",
+          "what_happens": "Each analyst turn sends the retrieval context plus the conversation history to Sonnet 4 and gets a grounded answer with source references.",
+          "tokens_in_per_run": 28000,
+          "tokens_out_per_run": 1200,
+          "calls_per_run": 8,
+          "usd_per_run": 0.102,
+          "share_of_run_pct": 16,
+          "invisible_reason": null
+        },
+        {
+          "component": "prompt",
+          "label": "Analyst persona and source citation rules",
+          "what_happens": "A 5,500-token prompt defining fund-specific terminology, source ranking rules, and hedging language is resent on every turn without caching.",
+          "tokens_in_per_run": 44000,
+          "tokens_out_per_run": 0,
+          "calls_per_run": 8,
+          "usd_per_run": 0.132,
+          "share_of_run_pct": 21,
+          "invisible_reason": null
+        },
+        {
+          "component": "orchestration",
+          "label": "Query routing and intent classification",
+          "what_happens": "Each turn is first sent to a lightweight classifier to determine retrieval strategy (semantic vs. metadata filter vs. hybrid). The classifier call is billed separately.",
+          "tokens_in_per_run": 4800,
+          "tokens_out_per_run": 320,
+          "calls_per_run": 8,
+          "usd_per_run": 0.019,
+          "share_of_run_pct": 3,
+          "invisible_reason": "Intent classification calls are made by the chatbot middleware layer; they land on a platform cost center separate from the analytics workflow budget."
+        },
+        {
+          "component": "retrieval",
+          "label": "Knowledge base vector queries per turn",
+          "what_happens": "Each turn retrieves the top-8 chunks from the internal research index. The index is rebuilt nightly including unchanged documents.",
+          "tokens_in_per_run": 36000,
+          "tokens_out_per_run": 0,
+          "calls_per_run": 8,
+          "usd_per_run": 0.082,
+          "share_of_run_pct": 13,
+          "invisible_reason": "Nightly index rebuild re-embeds the full knowledge base regardless of which documents have changed; this cost appears on the embedding-provider invoice, not the chatbot budget."
+        },
+        {
+          "component": "history",
+          "label": "Full session history re-sent on every turn",
+          "what_happens": "The complete conversation transcript from turn 1 is resent on every subsequent turn. By turn 8 of a session this is 48k+ tokens of prior dialogue injected as context.",
+          "tokens_in_per_run": 144000,
+          "tokens_out_per_run": 0,
+          "calls_per_run": 8,
+          "usd_per_run": 0.297,
+          "share_of_run_pct": 47,
+          "invisible_reason": "Session history is managed by the chat framework as a first-class feature; the token volume it generates is never disaggregated from the per-turn inference cost in any dashboard the fund currently runs."
+        }
+      ],
+      "totals": {
+        "usd_per_run": 0.632,
+        "usd_per_user_per_day": 0.253,
+        "usd_per_year_scenario": 39500,
+        "invisible_share_pct": 63
+      },
+      "shock_line": "The internal research chatbot costs ~$39.5k/yr to run; 47% of that is full session history re-billed on every turn - a cost that compounds with session depth and is invisible in every current dashboard.",
+      "what_firedog_shows": [
+        "Per-session cost curve showing how cost-per-turn grows as session depth increases.",
+        "Which analysts are running the deepest sessions and what compounded history cost looks like across their daily usage.",
+        "Projected annual saving from implementing a sliding-window summary compression after turn 4."
+      ],
+      "what_you_can_do": [
+        "Compress session history into a rolling 2,000-token summary after turn 4; test answer quality delta across 50 representative sessions before rolling out.",
+        "Cache the 5,500-token analyst persona prefix via Anthropic prompt caching; at 8 calls/run it saves roughly $0.13/run.",
+        "Switch nightly index rebuild to incremental updates; only documents modified in the last 24 hours need re-embedding."
+      ],
+      "meta": "Internal research chatbot: $39.5k/yr, 47% from session history compounding per turn. Firedog surfaces per-session cost curves analysts and CTOs have never seen before."
+    }
+  ]
+}
