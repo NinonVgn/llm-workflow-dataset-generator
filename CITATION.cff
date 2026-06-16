@@ -1,10 +1,12 @@
 cff-version: 1.2.0
-title: LLM Workflow Cost & Latency Dataset Generator
-message: If you use this dataset generator in your research, please cite it.
+title: "LLM Workflow Cost & Latency Dataset Generator"
+message: "If you use this dataset generator in your research, please cite it."
 type: software
 license: MIT
 date-released: "2026-06-16"
 url: "https://github.com/NinonVgn/llm-workflow-dataset-generator"
+authors:
+  - name: "TON_USERNAME"
 keywords:
   - llm
   - ai-agents
